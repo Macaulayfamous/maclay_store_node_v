@@ -11,23 +11,26 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   @override
-  void initState() {
-    super.initState();
-    
-    // Check if the widget is still mounted before setting the timer
-    if (mounted) {
-      Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SecondSplashPage(),
-            ),
-          );
-        }
-      });
-    }
+void initState() {
+  super.initState();
+
+  // Store the context in a local variable
+  final context = this.context;
+
+  // Check if the widget is still mounted before setting the timer
+  if (mounted) {
+    Timer(const Duration(seconds: 3), () {
+      if (mounted && context != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SecondSplashPage(),
+          ),
+        );
+      }
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {

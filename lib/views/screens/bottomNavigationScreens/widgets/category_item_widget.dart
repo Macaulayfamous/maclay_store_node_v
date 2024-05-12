@@ -58,7 +58,7 @@ class _CategoryItemState extends State<CategoryItem>
                     context,
                     MaterialPageRoute(builder: (context) {
                       return InnerCatgoryProductsScreen(
-                          categoryModel: categoryData);
+                          categoryName: categoryData.name);
                     }),
                   );
                 },

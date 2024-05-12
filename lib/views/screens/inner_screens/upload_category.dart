@@ -17,6 +17,7 @@ class _UploadCategoryState extends State<UploadCategory> {
   late String categoryName;
   final ImagePicker picker = ImagePicker();
   File? _image;
+  File? _pickBanner;
 
   chooseImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -26,6 +27,18 @@ class _UploadCategoryState extends State<UploadCategory> {
     } else {
       setState(() {
         _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  chooseBanner() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) {
+      print('no image picked');
+    } else {
+      setState(() {
+        _pickBanner = File(pickedFile.path);
       });
     }
   }
@@ -58,8 +71,8 @@ class _UploadCategoryState extends State<UploadCategory> {
                 Column(
                   children: [
                     Container(
-                      height: 140,
-                      width: 150,
+                      height: 100,
+                      width: 100,
                       decoration: BoxDecoration(
                         color: Colors.grey.shade500,
                         border: Border.all(color: Colors.grey.shade800),
@@ -85,7 +98,7 @@ class _UploadCategoryState extends State<UploadCategory> {
                         child: const Text(
                           'Upload Image',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -113,29 +126,71 @@ class _UploadCategoryState extends State<UploadCategory> {
                     ),
                   ),
                 ),
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      Colors.white,
-                    ),
-                    side: MaterialStateProperty.all(
-                      BorderSide(
-                        color: Colors.blue.shade900,
+              ],
+            ),
+            Column(
+              children: [
+                Container(
+                  height: 100,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade500,
+                    border: Border.all(color: Colors.grey.shade800),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: _pickBanner != null
+                        ? Image.file(_pickBanner!)
+                        : const Text(
+                            'Upload Image',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      chooseBanner();
+                    },
+                    child: const Text(
+                      'Upload Image',
+                      style: TextStyle(
+                        color: Colors.black,
                       ),
                     ),
-                  ),
-                  onPressed: () {
-                    _categoryService.uploadCategory(
-                        context: context, name: categoryName, pickedImage: _image!);
-                  },
-                  child: const Text(
-                    'Save',
                   ),
                 ),
               ],
             ),
-           
           ],
+        ),
+      ),
+      bottomSheet: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              Colors.white,
+            ),
+            side: MaterialStateProperty.all(
+              BorderSide(
+                color: Colors.blue.shade900,
+              ),
+            ),
+          ),
+          onPressed: () {
+            _categoryService.uploadCategory(
+                context: context,
+                name: categoryName,
+                pickedImage: _image,
+                pickedBanner: _pickBanner);
+          },
+          child: const Text(
+            'Save',
+          ),
         ),
       ),
     );

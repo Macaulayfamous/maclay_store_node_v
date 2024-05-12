@@ -1,42 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:maclay_shop_node_project/models/category_models.dart';
 import 'package:maclay_shop_node_project/models/sub_category_models.dart';
 import 'package:maclay_shop_node_project/services/category_service.dart';
 import 'package:maclay_shop_node_project/services/subcategory_service.dart';
+import 'package:maclay_shop_node_project/views/screens/bottomNavigationScreens/widgets/reuseable_search.dart';
+import 'package:maclay_shop_node_project/views/screens/inner_screens/inner_category_screen.dart';
 
-import 'package:shimmer/shimmer.dart';
-
-class CategoryScreen extends StatefulWidget {
-  const CategoryScreen({super.key});
+class CategoriesPage extends StatefulWidget {
+  const CategoriesPage({Key? key}) : super(key: key);
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  _CategoriesPageState createState() => _CategoriesPageState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
-  final CategoryService _categoryService = CategoryService();
-  final SubCategoryService _subCategoryService = SubCategoryService();
+class _CategoriesPageState extends State<CategoriesPage> {
   late Future<List<CategoryModel>> _categoriesFuture;
   List<SubCategoryModels> _subCategories = [];
-  String? _selectedCategory;
-
+  CategoryModel? _selectedCategory;
   @override
   void initState() {
     super.initState();
-    _categoriesFuture = _categoryService.loadCategories();
-    _selectedCategory = "Electronic";
-    _loadSubCategories(
-        _selectedCategory!); // Load subcategories for the default category
+    _categoriesFuture = CategoryService().loadCategories();
+    _categoriesFuture.then((categories) {
+      for (var category in categories) {
+        if (category.name == "Fashion") {
+          setState(() {
+            _selectedCategory = category;
+          });
+          _loadSubCategories(category.name);
+          break;
+        }
+      }
+    });
   }
 
   Future<void> _loadSubCategories(String categoryName) async {
     final subCategories =
-        await _subCategoryService.getSubCategoriesByCategoryName(categoryName);
+        await SubCategoryService().getSubCategoriesByCategoryName(categoryName);
     setState(() {
-      _subCategories = subCategories
-          .where((subCategory) => subCategory.categoryName == categoryName)
-          .toList();
+      _subCategories = subCategories;
     });
   }
 
@@ -44,175 +48,168 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories'),
+        automaticallyImplyLeading: false,
+        title: const ReusableSearchWidget(),
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-              child: FutureBuilder<List<CategoryModel>>(
-            future: _categoriesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: 6, // Set a fixed count for shimmer effect
-                      itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                final categories = snapshot.data!;
-                return ListView.builder(
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    final category = categories[index];
-                    return ListTile(
-                      subtitle: Image.network(
-                        category.image,
-                        width: 40,
-                        height: 40,
-                      ),
-                      title: Text(
-                        category.name,
-                        style: GoogleFonts.lato(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          _selectedCategory = category.name;
-                          _loadSubCategories(_selectedCategory!);
-                        });
-                      },
-                    );
-                  },
-                );
-              }
-            },
-          )),
-          Expanded(
-            flex: 3,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.grey[200],
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: _subCategories.length,
-                itemBuilder: (context, index) {
-                  final subCategory = _subCategories[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Handle subcategory tap
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
-                              ),
-                              child: Image.network(
-                                subCategory.image,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              subCategory.subcategoryName,
-                              style: const TextStyle(
-                                fontSize: 16,
+      backgroundColor: const Color(0xffF5F5F5),
+      resizeToAvoidBottomInset: false,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left side - Display categories
+            Expanded(
+              flex: 2,
+              child: Container(
+                color: Colors.grey.shade200,
+                child: FutureBuilder<List<CategoryModel>>(
+                  future: _categoriesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else {
+                      final categories = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          return ListTile(
+                            title: Text(
+                              category.name,
+                              style: GoogleFonts.roboto(
                                 fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: _selectedCategory == category
+                                    ? Colors.blue
+                                    : null,
                               ),
-                              textAlign: TextAlign.center,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Handle button press
+                            onTap: () {
+                              setState(() {
+                                _selectedCategory = category;
+                              });
+                              _loadSubCategories(category
+                                  .name); // Fetch subcategories by category name
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(10),
-                                  bottomRight: Radius.circular(10),
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              'View Products',
-                              style: GoogleFonts.lato(
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                          );
+                        },
+                      );
+                    }
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+
+            // Right side - Display selected category details
+            Expanded(
+              flex: 5,
+              child: _selectedCategory != null
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            _selectedCategory!.name,
+                            style: GoogleFonts.getFont(
+                              'Roboto',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 150, // Adjust the height of the container
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                _selectedCategory!.banner,
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                            height:
+                                8), // Adjust the gap between the banner and subcategories
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _buildSubcategoryRows(),
+                        ),
+                      ],
+                    )
+                  : Container(),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  List<Widget> _buildSubcategoryRows() {
+    List<Widget> rows = [];
+    List<Widget> currentRow = [];
+
+    for (int i = 0; i < _subCategories.length; i++) {
+      final subCategory = _subCategories[i];
+      currentRow.add(
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) {
+                  //     return InnerCatgoryProductsScreen(
+                  //         categoryName: subCategory.categoryId);
+                  //   }),
+                  // );
+                },
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                  ),
+                  child: Center(
+                    child: Image.network(
+                      subCategory.image,
+                      fit: BoxFit.contain,
+                      width: 27,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                subCategory.subcategoryName,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Check if we've reached three items or it's the last item
+      if ((i + 1) % 3 == 0 || i == _subCategories.length - 1) {
+        rows.add(
+          Row(
+            children: List.from(currentRow),
+          ),
+        );
+        currentRow.clear();
+      }
+    }
+    return rows;
   }
 }

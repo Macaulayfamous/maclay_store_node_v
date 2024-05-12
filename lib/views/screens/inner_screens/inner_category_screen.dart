@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:maclay_shop_node_project/models/category_models.dart';
 import 'package:maclay_shop_node_project/models/product_model.dart';
 import 'package:maclay_shop_node_project/services/product_service.dart';
 import 'package:maclay_shop_node_project/views/screens/bottomNavigationScreens/widgets/product_item.dart';
@@ -8,9 +7,9 @@ import 'package:maclay_shop_node_project/views/screens/inner_screens/product_det
 import 'package:shimmer/shimmer.dart';
 
 class InnerCatgoryProductsScreen extends StatefulWidget {
-  final CategoryModel categoryModel;
+  final String categoryName;
 
-  const InnerCatgoryProductsScreen({super.key, required this.categoryModel});
+  const InnerCatgoryProductsScreen({super.key, required this.categoryName});
 
   @override
   _InnerCatgoryProductsScreenState createState() =>
@@ -26,7 +25,7 @@ class _InnerCatgoryProductsScreenState
   void initState() {
     super.initState();
     _productsFuture =
-        productService.loadProductsByCategory(widget.categoryModel.name);
+        productService.loadProductsByCategory(widget.categoryName);
   }
 
   @override
@@ -34,7 +33,7 @@ class _InnerCatgoryProductsScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.categoryModel.name,
+          widget.categoryName,
           style: GoogleFonts.lato(),
         ),
       ),
@@ -48,7 +47,7 @@ class _InnerCatgoryProductsScreenState
           } else if (snapshot.data == null || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
-                'No products found in\n ${widget.categoryModel.name}',
+                'No products found in\n ${widget.categoryName}',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lato(
                   fontSize: 19,

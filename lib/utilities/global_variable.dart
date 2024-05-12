@@ -1,1 +1,1 @@
-String uri = "http://192.168.1.170:5000";
+String uri = "https://maclay-store-app-768183fe237c.herokuapp.com";

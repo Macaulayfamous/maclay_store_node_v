@@ -6,7 +6,6 @@ import 'package:maclay_shop_node_project/provider/category_provider.dart';
 import 'package:maclay_shop_node_project/provider/product.dart';
 import 'package:maclay_shop_node_project/provider/user_provider.dart';
 import 'package:maclay_shop_node_project/services/auth_service.dart';
-import 'package:maclay_shop_node_project/views/screens/bottomNavigationScreens/add_product_screen.dart';
 import 'package:maclay_shop_node_project/views/screens/main_screen.dart';
 import 'package:maclay_shop_node_project/views/screens/splash_screen.dart';
 import 'package:provider/provider.dart';

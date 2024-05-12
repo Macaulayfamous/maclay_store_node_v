@@ -11,7 +11,7 @@ class CategoryService {
   uploadCategory(
       {required context,
       required String name,
-      required File? pickedImage}) async {
+      required File? pickedImage, pickedBanner}) async {
     try {
       // Check if the pickedImage is not null before uploading
       if (pickedImage != null) {
@@ -23,11 +23,18 @@ class CategoryService {
         );
         String image = cloudRes.secureUrl;
 
+                 // Upload the banner image
+        CloudinaryResponse bannerRes = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(pickedBanner.path, folder: 'banners'),
+        );
+        String banner = bannerRes.secureUrl;
+
         // Proceed with category upload using the imageUrl
         CategoryModel categoryModel = CategoryModel(
           id: '',
           name: name,
           image: image,
+          banner: banner
         );
         http.Response response = await http.post(
           Uri.parse('$uri/api/categories'),
